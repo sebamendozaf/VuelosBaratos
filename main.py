@@ -27,12 +27,20 @@ def run():
         print("No se encontraron vuelos.")
         return
 
-    # Guardar historial y detectar ofertas
+    # Guardar historial completo
     price_tracker.record_prices(all_offers)
-    deals = price_tracker.find_deals(all_offers)
-    print(f"Ofertas detectadas: {len(deals)}")
 
-    # Filtrar las que ya se notificaron
+    # Quedarse solo con el vuelo más barato por destino
+    cheapest_by_dest = {}
+    for offer in all_offers:
+        dest = offer["destination"]
+        if dest not in cheapest_by_dest or offer["price"] < cheapest_by_dest[dest]["price"]:
+            cheapest_by_dest[dest] = offer
+    best_offers = list(cheapest_by_dest.values())
+    print(f"Mejor precio por destino: {len(best_offers)} vuelos")
+
+    # Detectar ofertas y filtrar duplicadas
+    deals = price_tracker.find_deals(best_offers)
     new_deals = [d for d in deals if not price_tracker.is_already_notified(d)]
     print(f"Ofertas nuevas: {len(new_deals)}")
 
